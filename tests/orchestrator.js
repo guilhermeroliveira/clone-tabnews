@@ -5,7 +5,7 @@ async function waitForAllServices() {
 }
 
 async function waitForWebServer() {
-  const fetchStatus = async (bail, attempt) => {
+  const fetchStatus = async () => {
     const response = await fetch("http://localhost:3000/api/v1/status");
     if (!response.ok) {
       throw new Error();
@@ -18,6 +18,8 @@ async function waitForWebServer() {
   });
 }
 
-export default {
+const orchestrator = {
   waitForAllServices,
 };
+
+export default orchestrator;
