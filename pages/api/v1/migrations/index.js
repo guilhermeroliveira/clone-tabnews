@@ -5,9 +5,9 @@ import { join } from "node:path";
 export default async function migrations(request, response) {
   const allowedMethods = ["GET", "POST"];
   if (!allowedMethods.includes(request.method)) {
-    return response.status(405).json(({
-      error: `Method '${request.method}' not allowed.`
-    }));
+    return response.status(405).json({
+      error: `Method '${request.method}' not allowed.`,
+    });
   }
 
   let dbClient;
@@ -20,7 +20,7 @@ export default async function migrations(request, response) {
       dir: join("infra", "migrations"),
       direction: "up",
       dryRun: true,
-      migrationsTable: "pgmigrations"
+      migrationsTable: "pgmigrations",
     };
 
     if (request.method === "GET") {
@@ -31,11 +31,12 @@ export default async function migrations(request, response) {
     if (request.method === "POST") {
       const migratedMigrations = await migrationRunner({
         ...defaultMigrationOptions,
-        dryRun: false
+        dryRun: false,
       });
 
-      if (migratedMigrations.length > 0)
+      if (migratedMigrations.length > 0) {
         return response.status(201).json(migratedMigrations);
+      }
 
       return response.status(200).json(migratedMigrations);
     }
@@ -43,7 +44,8 @@ export default async function migrations(request, response) {
     console.error(error);
     throw error;
   } finally {
-    if (dbClient)
+    if (dbClient) {
       await dbClient.end();
+    }
   }
 }

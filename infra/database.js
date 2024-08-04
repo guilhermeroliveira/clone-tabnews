@@ -7,7 +7,7 @@ async function getNewClient() {
     user: process.env.POSTGRES_USER,
     database: process.env.POSTGRES_DB,
     password: process.env.POSTGRES_PASSWORD,
-    ssl: process.env.POSTGRES_USE_SSL === 'true'
+    ssl: process.env.POSTGRES_USE_SSL === "true",
   });
 
   await client.connect();
@@ -25,13 +25,13 @@ async function query(queryObject) {
     console.error(error);
     throw error;
   } finally {
-    if (client)
+    if (client) {
       await client.end();
+    }
   }
-
 }
 
 export default {
   query,
-  getNewClient
+  getNewClient,
 };
