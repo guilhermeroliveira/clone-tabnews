@@ -19,15 +19,12 @@ async function query(queryObject) {
 
   try {
     client = await getNewClient();
-    const result = await client.query(queryObject);
-    return result;
+    return await client.query(queryObject);
   } catch (error) {
     console.error(error);
     throw error;
   } finally {
-    if (client) {
-      await client.end();
-    }
+    await client?.end();
   }
 }
 
