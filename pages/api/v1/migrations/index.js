@@ -1,5 +1,5 @@
 import errorController from "infra/errors/error-handlers";
-import migrator from "model/migrations";
+import migrator from "model/migrator";
 import { createRouter } from "next-connect";
 
 const router = createRouter();
