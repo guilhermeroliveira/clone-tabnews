@@ -13,9 +13,9 @@ export function handleUncaughtError(error, _, response) {
   response.status(publicError.statusCode).json(publicError);
 }
 
-const errorController = {
+const errorHandler = {
   onNoMatch: handleMethodNotAllowed,
   onError: handleUncaughtError,
 };
 
-export default errorController;
+export default errorHandler;
