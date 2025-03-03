@@ -1,4 +1,4 @@
-import errorController from "infra/errors/error-handlers";
+import errorHandler from "infra/errors/error-handlers";
 import migrator from "model/migrator";
 import { createRouter } from "next-connect";
 
@@ -6,8 +6,6 @@ const router = createRouter();
 
 router.get(getHandler);
 router.post(postHandler);
-
-export default router.handler(errorController);
 
 async function getHandler(_, response) {
   const pendingMigrations = await migrator.listPendingMigrations();
@@ -23,3 +21,5 @@ async function postHandler(_, response) {
 
   return response.status(200).json(migratedMigrations);
 }
+
+export default router.handler(errorHandler);
