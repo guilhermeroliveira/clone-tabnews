@@ -58,3 +58,24 @@ export class ServiceError extends Error {
     };
   }
 }
+
+export class ConflictError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "A conflict has occurred.", {
+      cause,
+    });
+
+    this.name = "ConflictError";
+    this.action = action || "Check if the service is available.";
+    this.statusCode = 409;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}

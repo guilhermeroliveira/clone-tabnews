@@ -1,10 +1,14 @@
-import { InternalServerError, MethodNotAllowedError } from "infra/errors/errors";
+import { ConflictError, InternalServerError, MethodNotAllowedError } from "infra/errors/errors";
 
 export function handleMethodNotAllowed(_, response) {
   response.status(405).json(new MethodNotAllowedError());
 }
 
 export function handleUncaughtError(error, _, response) {
+  if (error instanceof ConflictError) {
+    return response.status(error.statusCode).json(error);
+  }
+
   const publicError = new InternalServerError({
     cause: error,
     statusCode: error.statusCode,
