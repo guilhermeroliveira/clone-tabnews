@@ -1,5 +1,5 @@
 import database from "infra/database";
-import { ConflictError } from "infra/errors/errors.js";
+import { ConflictError, NotFoundError } from "infra/errors/errors.js";
 
 async function create(createUserData) {
   await validateUniqueEmail(createUserData.email);
@@ -70,8 +70,38 @@ async function create(createUserData) {
   }
 }
 
+async function findOneByUsername(username) {
+  const userFound = await runSelectQuery(username);
+  return userFound;
+
+  async function runSelectQuery(username) {
+    const result = await database.query({
+      text: `
+      SELECT
+        *
+      FROM
+        user_account
+      WHERE
+        LOWER(username) = LOWER($1)
+      LIMIT
+        1;
+    `,
+      values: [username],
+    });
+
+    if (result.rowCount === 0) {
+      throw new NotFoundError({
+        message: "The given username was not found.",
+        action: "Check the username and try again.",
+      });
+    }
+    return result.rows[0];
+  }
+}
+
 const user = {
   create,
+  findOneByUsername,
 };
 
 export default user;

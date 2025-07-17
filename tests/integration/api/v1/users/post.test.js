@@ -2,11 +2,9 @@ import orchestrator from "tests/orchestrator";
 import { version as uuidVersion } from "uuid";
 
 beforeAll(async () => {
-  const waitPromise = orchestrator.waitForAllServices();
+  await orchestrator.waitForAllServices();
   await orchestrator.clearDatabase();
   await orchestrator.runPendingMigrations();
-
-  await waitPromise;
 });
 
 describe("POST /api/v1/users", () => {
