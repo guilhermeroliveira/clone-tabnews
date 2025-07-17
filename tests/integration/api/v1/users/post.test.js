@@ -2,19 +2,27 @@ import orchestrator from "tests/orchestrator";
 import { version as uuidVersion } from "uuid";
 
 beforeAll(async () => {
-  await orchestrator.waitForAllServices();
+  const waitPromise = orchestrator.waitForAllServices();
   await orchestrator.clearDatabase();
   await orchestrator.runPendingMigrations();
+
+  await waitPromise;
 });
 
-describe("POST /api/v1/user", () => {
+describe("POST /api/v1/users", () => {
+  const testURL = "http://localhost:3000/api/v1/users";
+
+  const baseRequest = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
   describe("Anonymous User", () => {
     test("With unique and valid data", async () => {
-      const response = await fetch("http://localhost:3000/api/v1/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response = await fetch(testURL, {
+        ...baseRequest,
         body: JSON.stringify({
           username: "username_test",
           email: "email@test.com",
@@ -45,22 +53,16 @@ describe("POST /api/v1/user", () => {
         password: "test",
       };
 
-      const response1 = await fetch("http://localhost:3000/api/v1/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response1 = await fetch(testURL, {
+        ...baseRequest,
         body: JSON.stringify({
           ...newUser,
         }),
       });
       expect(response1.status).toBe(201);
 
-      const response2 = await fetch("http://localhost:3000/api/v1/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response2 = await fetch(testURL, {
+        ...baseRequest,
         body: JSON.stringify({
           ...newUser,
           username: "duplicated_email2",
@@ -84,22 +86,16 @@ describe("POST /api/v1/user", () => {
         password: "test",
       };
 
-      const response1 = await fetch("http://localhost:3000/api/v1/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response1 = await fetch(testURL, {
+        ...baseRequest,
         body: JSON.stringify({
           ...newUser,
         }),
       });
       expect(response1.status).toBe(201);
 
-      const response2 = await fetch("http://localhost:3000/api/v1/user", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+      const response2 = await fetch(testURL, {
+        ...baseRequest,
         body: JSON.stringify({
           ...newUser,
           email: "duplicated_username2@test.com",
