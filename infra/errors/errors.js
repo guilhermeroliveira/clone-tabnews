@@ -58,3 +58,45 @@ export class ServiceError extends Error {
     };
   }
 }
+
+export class ConflictError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "A conflict has occurred.", {
+      cause,
+    });
+
+    this.name = "ConflictError";
+    this.action = action || "Check if the service is available.";
+    this.statusCode = 409;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
+
+export class NotFoundError extends Error {
+  constructor({ cause, message, action }) {
+    super(message || "Resource not found.", {
+      cause,
+    });
+
+    this.name = "NotFoundError";
+    this.action = action || "Check the resource path and query params and try again.";
+    this.statusCode = 404;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      action: this.action,
+      status_code: this.statusCode,
+    };
+  }
+}
