@@ -1,3 +1,5 @@
+import password from "model/password";
+import user from "model/user";
 import orchestrator from "tests/orchestrator";
 import { version as uuidVersion } from "uuid";
 
@@ -34,7 +36,7 @@ describe("POST /api/v1/users", () => {
         id: responseBody.id,
         username: "username_test",
         email: "email@test.com",
-        password: "test",
+        password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
       });
@@ -42,6 +44,13 @@ describe("POST /api/v1/users", () => {
       expect(uuidVersion(responseBody.id)).toEqual(4);
       expect(Date.parse(responseBody.created_at)).not.toBeNaN();
       expect(Date.parse(responseBody.updated_at)).not.toBeNaN();
+
+      const userInDatabase = await user.findOneByUsername("username_test");
+      const correctPasswordMatch = await password.compare("test", userInDatabase.password);
+      expect(correctPasswordMatch).toBe(true);
+
+      const incorrectPasswordMatch = await password.compare("test2", userInDatabase.password);
+      expect(incorrectPasswordMatch).toBe(false);
     });
 
     test("With duplicated e-mail", async () => {

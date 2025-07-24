@@ -1,9 +1,11 @@
 import database from "infra/database";
 import { ConflictError, NotFoundError } from "infra/errors/errors.js";
+import password from "./password";
 
 async function create(createUserData) {
   await validateUniqueEmail(createUserData.email);
   await validateUniqueUsername(createUserData.username);
+  await hashPasswordInObject(createUserData);
 
   return runInsertQuery(createUserData);
 
@@ -47,6 +49,11 @@ async function create(createUserData) {
         action: "Use another username to proceed.",
       });
     }
+  }
+
+  async function hashPasswordInObject(userData) {
+    const hashedPassword = await password.hash(userData.password);
+    userData.password = hashedPassword;
   }
 
   async function runInsertQuery(createUserData) {
