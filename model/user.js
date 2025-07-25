@@ -1,53 +1,13 @@
 import database from "infra/database";
 import { ConflictError, NotFoundError } from "infra/errors/errors.js";
+import password from "./password";
 
 async function create(createUserData) {
   await validateUniqueEmail(createUserData.email);
   await validateUniqueUsername(createUserData.username);
+  await hashPasswordInObject(createUserData);
 
   return runInsertQuery(createUserData);
-
-  async function validateUniqueEmail(email) {
-    const {
-      rows: [{ count }],
-    } = await database.query({
-      text: `
-      SELECT COUNT(id) FROM
-        user_account
-      WHERE
-        LOWER(email) = LOWER($1)
-    `,
-      values: [email],
-    });
-
-    if (count > 0) {
-      throw new ConflictError({
-        message: "The given email already is registered.",
-        action: "Use another email to proceed.",
-      });
-    }
-  }
-
-  async function validateUniqueUsername(username) {
-    const {
-      rows: [{ count }],
-    } = await database.query({
-      text: `
-      SELECT COUNT(id) FROM
-        user_account
-      WHERE
-        LOWER(username) = LOWER($1)
-    `,
-      values: [username],
-    });
-
-    if (count > 0) {
-      throw new ConflictError({
-        message: "The given username already is registered.",
-        action: "Use another username to proceed.",
-      });
-    }
-  }
 
   async function runInsertQuery(createUserData) {
     const result = await database.query({
@@ -64,6 +24,52 @@ async function create(createUserData) {
         createUserData.email.toLowerCase(),
         createUserData.password,
       ],
+    });
+
+    return result.rows[0];
+  }
+}
+
+async function update(username, updateUserData) {
+  const currentUser = await findOneByUsername(username);
+
+  if (
+    "username" in updateUserData &&
+    username.toLowerCase() !== updateUserData.username.toLowerCase()
+  ) {
+    await validateUniqueUsername(updateUserData.username);
+  }
+
+  if ("email" in updateUserData) {
+    await validateUniqueEmail(updateUserData.email);
+  }
+
+  if ("password" in updateUserData) {
+    await hashPasswordInObject(updateUserData);
+  }
+
+  const updatedUser = await runUpdateQuery({
+    ...currentUser,
+    ...updateUserData,
+  });
+  return updatedUser;
+
+  async function runUpdateQuery(user) {
+    const result = await database.query({
+      text: `
+      UPDATE
+        user_account
+      SET
+        username = $2,
+        email = $3,
+        password = $4,
+        updated_at = timezone('utc', now())
+      WHERE
+        id = $1
+      RETURNING
+        *
+      `,
+      values: [user.id, user.username, user.email, user.password],
     });
 
     return result.rows[0];
@@ -99,9 +105,57 @@ async function findOneByUsername(username) {
   }
 }
 
+async function hashPasswordInObject(userData) {
+  const hashedPassword = await password.hash(userData.password);
+  userData.password = hashedPassword;
+}
+
+async function validateUniqueUsername(username) {
+  const {
+    rows: [{ count }],
+  } = await database.query({
+    text: `
+      SELECT COUNT(id) FROM
+        user_account
+      WHERE
+        LOWER(username) = LOWER($1)
+    `,
+    values: [username],
+  });
+
+  if (count > 0) {
+    throw new ConflictError({
+      message: "The given username already is registered.",
+      action: "Use another username to proceed.",
+    });
+  }
+}
+
+async function validateUniqueEmail(email) {
+  const {
+    rows: [{ count }],
+  } = await database.query({
+    text: `
+      SELECT COUNT(id) FROM
+        user_account
+      WHERE
+        LOWER(email) = LOWER($1)
+    `,
+    values: [email],
+  });
+
+  if (count > 0) {
+    throw new ConflictError({
+      message: "The given email already is registered.",
+      action: "Use another email to proceed.",
+    });
+  }
+}
+
 const user = {
   create,
   findOneByUsername,
+  update,
 };
 
 export default user;
