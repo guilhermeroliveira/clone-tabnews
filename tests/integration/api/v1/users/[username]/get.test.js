@@ -20,22 +20,9 @@ describe("GET /api/v1/users/[username]", () => {
 
   describe("Anonymous User", () => {
     test("With exact case match", async () => {
-      const user = {
+      const user = await orchestrator.createUser({
         username: "exactmatch",
-        email: "exactmatch@test.com",
-        password: "test",
-      };
-
-      const createResponse = await fetch(testURL, {
-        ...{
-          ...baseRequest,
-          method: "POST",
-        },
-        body: JSON.stringify({
-          ...user,
-        }),
       });
-      expect(createResponse.status).toBe(201);
 
       const getResponse = await fetch(testURL + user.username, {
         ...baseRequest,
@@ -57,22 +44,9 @@ describe("GET /api/v1/users/[username]", () => {
     });
 
     test("With case mismatch", async () => {
-      const user = {
+      const user = await orchestrator.createUser({
         username: "CaseMismatch",
-        email: "case.mismatch@test.com",
-        password: "test",
-      };
-
-      const createResponse = await fetch(testURL, {
-        ...{
-          ...baseRequest,
-          method: "POST",
-        },
-        body: JSON.stringify({
-          ...user,
-        }),
       });
-      expect(createResponse.status).toBe(201);
 
       const getResponse = await fetch(testURL + "casemismatch", {
         ...baseRequest,

@@ -21,18 +21,8 @@ describe("PATCH /api/v1/users/[username]", () => {
 
   describe("Anonymous User", () => {
     test("With unique username", async () => {
-      const user1 = {
+      await orchestrator.createUser({
         username: "unique_username",
-        email: "unique_username@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user1,
-        }),
       });
 
       const response = await fetch(testURL + "unique_username", {
@@ -47,7 +37,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       expect(responseBody).toEqual({
         id: responseBody.id,
         username: "unique_username2",
-        email: "unique_username@test.com",
+        email: responseBody.email,
         password: responseBody.password,
         created_at: responseBody.created_at,
         updated_at: responseBody.updated_at,
@@ -63,21 +53,11 @@ describe("PATCH /api/v1/users/[username]", () => {
     });
 
     test("With unique email", async () => {
-      const user1 = {
-        username: "unique_email",
+      const { username } = await orchestrator.createUser({
         email: "unique_email@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user1,
-        }),
       });
 
-      const response = await fetch(testURL + "unique_email", {
+      const response = await fetch(testURL + username, {
         ...baseRequest,
         body: JSON.stringify({
           email: "unique_email2@test.com",
@@ -88,7 +68,7 @@ describe("PATCH /api/v1/users/[username]", () => {
       const responseBody = await response.json();
       expect(responseBody).toEqual({
         id: responseBody.id,
-        username: "unique_email",
+        username: responseBody.username,
         email: "unique_email2@test.com",
         password: responseBody.password,
         created_at: responseBody.created_at,
@@ -105,18 +85,10 @@ describe("PATCH /api/v1/users/[username]", () => {
     });
 
     test("With new password", async () => {
-      const user1 = {
+      await orchestrator.createUser({
         username: "new_password",
         email: "new_password@test.com",
         password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user1,
-        }),
       });
 
       const response = await fetch(testURL + "new_password", {
@@ -169,32 +141,12 @@ describe("PATCH /api/v1/users/[username]", () => {
     });
 
     test("With duplicated username", async () => {
-      const user1 = {
+      await orchestrator.createUser({
         username: "duplicated_username1",
-        email: "duplicated_username1@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user1,
-        }),
       });
 
-      const user2 = {
+      await orchestrator.createUser({
         username: "duplicated_username2",
-        email: "duplicated_username2@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user2,
-        }),
       });
 
       const response = await fetch(testURL + "duplicated_username1", {
@@ -215,35 +167,15 @@ describe("PATCH /api/v1/users/[username]", () => {
     });
 
     test("With duplicated email", async () => {
-      const user1 = {
-        username: "duplicated_email1",
+      const user1 = await orchestrator.createUser({
         email: "duplicated_email1@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user1,
-        }),
       });
 
-      const user2 = {
-        username: "duplicated_email2",
+      await orchestrator.createUser({
         email: "duplicated_email2@test.com",
-        password: "test",
-      };
-
-      await fetch(testURL, {
-        ...baseRequest,
-        method: "POST",
-        body: JSON.stringify({
-          ...user2,
-        }),
       });
 
-      const response = await fetch(testURL + "duplicated_email1", {
+      const response = await fetch(testURL + user1.username, {
         ...baseRequest,
         body: JSON.stringify({
           email: "duplicated_email2@test.com",
