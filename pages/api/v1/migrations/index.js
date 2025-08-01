@@ -1,4 +1,4 @@
-import errorHandler from "infra/errors/error-handlers";
+import errorHandler from "infra/errors/error-handler";
 import migrator from "model/migrator";
 import { createRouter } from "next-connect";
 
