@@ -1,5 +1,5 @@
 import database from "infra/database";
-import errorHandler from "infra/errors/error-handlers";
+import errorHandler from "infra/errors/error-handler";
 import { createRouter } from "next-connect";
 
 const router = createRouter();

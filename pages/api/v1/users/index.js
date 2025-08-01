@@ -1,4 +1,4 @@
-import errorHandler from "infra/errors/error-handlers";
+import errorHandler from "infra/errors/error-handler";
 import user from "model/user";
 import { createRouter } from "next-connect";
 
