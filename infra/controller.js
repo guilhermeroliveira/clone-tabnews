@@ -21,7 +21,7 @@ export function handleUncaughtError(error, _, response) {
   response.status(publicError.statusCode).json(publicError);
 }
 
-async function setSessionCookie(sessionToken, responseObject) {
+function setSessionCookie(sessionToken, responseObject) {
   const sessionCookie = cookie.serialize("session_id", sessionToken, {
     path: "/",
     maxAge: session.EXPIRATION_IN_MILLIS / 1000,
