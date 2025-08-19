@@ -1,5 +1,4 @@
-import * as cookie from "cookie";
-import errorHandler from "infra/errors/error-handler";
+import controller from "infra/controller";
 import authentication from "model/authentication";
 import session from "model/session";
 import { createRouter } from "next-connect";
@@ -15,15 +14,9 @@ async function postHandler(request, response) {
 
   const newSession = await session.create(authenticatedUser.id);
 
-  const sessionCookie = cookie.serialize("session_id", newSession.token, {
-    path: "/",
-    maxAge: session.EXPIRATION_IN_MILLIS / 1000,
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-  });
-  response.setHeader("Set-Cookie", sessionCookie);
+  controller.setSessionCookie(newSession.token, response);
 
   return response.status(201).json(newSession);
 }
 
-export default router.handler(errorHandler);
+export default router.handler(controller.errorHandlers);

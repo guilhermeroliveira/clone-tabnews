@@ -1,4 +1,6 @@
+import * as cookie from "cookie";
 import * as errors from "infra/errors/errors";
+import session from "model/session";
 
 export function handleMethodNotAllowed(_, response) {
   response.status(405).json(new errors.MethodNotAllowedError());
@@ -19,9 +21,23 @@ export function handleUncaughtError(error, _, response) {
   response.status(publicError.statusCode).json(publicError);
 }
 
-const errorHandler = {
-  onNoMatch: handleMethodNotAllowed,
-  onError: handleUncaughtError,
+async function setSessionCookie(sessionToken, responseObject) {
+  const sessionCookie = cookie.serialize("session_id", sessionToken, {
+    path: "/",
+    maxAge: session.EXPIRATION_IN_MILLIS / 1000,
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  });
+
+  responseObject.setHeader("Set-Cookie", sessionCookie);
+}
+
+const controller = {
+  errorHandlers: {
+    onNoMatch: handleMethodNotAllowed,
+    onError: handleUncaughtError,
+  },
+  setSessionCookie,
 };
 
-export default errorHandler;
+export default controller;
