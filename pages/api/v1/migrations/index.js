@@ -1,4 +1,4 @@
-import errorHandler from "infra/errors/error-handler";
+import controller from "infra/controller";
 import migrator from "model/migrator";
 import { createRouter } from "next-connect";
 
@@ -22,4 +22,4 @@ async function postHandler(_, response) {
   return response.status(200).json(migratedMigrations);
 }
 
-export default router.handler(errorHandler);
+export default router.handler(controller.errorHandlers);
