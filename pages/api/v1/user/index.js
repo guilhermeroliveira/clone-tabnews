@@ -12,10 +12,11 @@ async function getHandler(request, response) {
 
   const foundSession = await session.findOneValidByToken(sessionToken);
   const updatedSession = await session.renew(foundSession.id);
+  controller.setSessionCookie(updatedSession.token, response);
 
   const foundUser = await user.findOneById(foundSession.user_id);
 
-  controller.setSessionCookie(updatedSession.token, response);
+  response.setHeader("Cache-Control", "no-store, no-cache, max-age=0, must-revalidate");
 
   return response.status(200).json(foundUser);
 }
