@@ -93,10 +93,43 @@ async function renew(sessionId) {
   return session;
 }
 
+async function expireById(sessionId) {
+  const session = await runUpdateQuery(sessionId);
+
+  async function runUpdateQuery(sessionId) {
+    const result = await database.query({
+      text: `
+        UPDATE
+          session
+        SET
+          expires_at = expires_at - interval '1 year',
+          updated_at = NOW()
+        WHERE
+          id = $1
+        RETURNING
+          *
+      `,
+      values: [sessionId],
+    });
+
+    if (result.rowCount === 0) {
+      throw new UnauthorizedError({
+        message: "User doesn't have an active session",
+        action: "Check if the user is logged in and try again.",
+      });
+    }
+
+    return result.rows[0];
+  }
+
+  return session;
+}
+
 const session = {
   create,
   findOneValidByToken,
   renew,
+  expireById,
   EXPIRATION_IN_MILLIS,
 };
 

@@ -11,6 +11,9 @@ export function handleUncaughtError(error, _, response) {
     !(error instanceof errors.ServiceError) &&
     Object.values(errors).some(err => error instanceof err)
   ) {
+    if (error instanceof errors.UnauthorizedError) {
+      clearSessionCookie(response);
+    }
     return response.status(error.statusCode).json(error);
   }
 
@@ -32,12 +35,24 @@ function setSessionCookie(sessionToken, responseObject) {
   responseObject.setHeader("Set-Cookie", sessionCookie);
 }
 
+function clearSessionCookie(responseObject) {
+  const sessionCookie = cookie.serialize("session_id", "invalid", {
+    path: "/",
+    maxAge: -1,
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+  });
+
+  responseObject.setHeader("Set-Cookie", sessionCookie);
+}
+
 const controller = {
   errorHandlers: {
     onNoMatch: handleMethodNotAllowed,
     onError: handleUncaughtError,
   },
   setSessionCookie,
+  clearSessionCookie,
 };
 
 export default controller;

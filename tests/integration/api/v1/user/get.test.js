@@ -154,6 +154,17 @@ describe("GET /api/v1/user", () => {
         action: "Check if the user is logged in and try again.",
         status_code: 401,
       });
+
+      const parsedSetCookie = setCookieParser(getResponse, {
+        map: true,
+      });
+      expect(parsedSetCookie.session_id).toEqual({
+        name: "session_id",
+        value: "invalid",
+        maxAge: -1,
+        path: "/",
+        httpOnly: true,
+      });
     });
   });
 });
